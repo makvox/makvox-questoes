@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Makvox Questões</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0b2a17, #041E10);
+    color: #EDEDED;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 95%;
+    max-width: 750px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+
+  img {
+    width: 90px;
+    margin-bottom: 10px;
+    opacity: 0.9;
+  }
+
+  h1 {
+    margin: 5px 0;
+    font-size: 30px;
+    letter-spacing: 1px;
+  }
+
+  p {
+    color: #9fc7b0;
+    margin-bottom: 25px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 160px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 15px;
+    background: rgba(0,0,0,0.3);
+    color: #EDEDED;
+    font-size: 14px;
+    outline: none;
+    transition: 0.3s;
+  }
+
+  textarea:focus {
+    border-color: #2E7D32;
+    box-shadow: 0 0 10px rgba(46,125,50,0.5);
+  }
+
+  button {
+    margin-top: 15px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    border: none;
+    background: linear-gradient(135deg, #2E7D32, #3fa046);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 5px 20px rgba(46,125,50,0.4);
+  }
+
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(46,125,50,0.6);
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  .output {
+    margin-top: 25px;
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.05);
+    text-align: left;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: 0.4s ease;
+  }
+
+  .output.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .loading {
+    color: #9fc7b0;
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    .container {
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+    }
+  }
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <img src="logo.png" alt="Makvox Logo">
+
+  <h1>Makvox Questões</h1>
+  <p>Gere questões estilo ENEM em segundos</p>
+
+  <textarea id="input" placeholder="Cole seu conteúdo aqui..."></textarea>
+
+  <button onclick="gerar()">Gerar questões</button>
+
+  <div id="output" class="output">As questões aparecerão aqui...</div>
+
+</div>
+
+<script>
+async function gerar() {
+  const input = document.getElementById("input").value;
+  const output = document.getElementById("output");
+
+  if (!input.trim()) {
+    alert("Coloca um conteúdo primeiro 😅");
+    return;
+  }
+
+  output.classList.remove("show");
+  output.innerHTML = "<span class='loading'>Gerando questões...</span>";
+
+  try {
+    const res = await fetch("http://localhost:3000/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: `Crie 5 questões estilo ENEM com base nisso:\n${input}`
+          }
+        ]
+      })
+    });
+
+    const data = await res.json();
+
+    output.innerText = data.reply;
+    output.classList.add("show");
+
+    output.scrollIntoView({ behavior: "smooth" });
+
+  } catch (err) {
+    output.innerHTML = "Erro ao conectar com o servidor.";
+    output.classList.add("show");
+  }
+}
+</script>
+
+</body>
+</html>
